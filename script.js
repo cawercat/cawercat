@@ -2,7 +2,7 @@
 const collections = {
     demim: {
         name: "WELCOME",
-        tracks: [1, 2],
+        tracks: [1, 2, 4, 5, 6],
         color: "#8B5CF6",
         description: "EXP"
     }
@@ -14,56 +14,51 @@ const tracks = [
         title: "Not",
         cover: "img/1.png",
         audio: "mu/not.mp3",
-        duration: "3:44",
+        duration: "0:00",
         releaseDate: "06.11.25",
         collection: "demim",
-        released: true,
-        bpm: 124 // BPM для точной синхронизации
+        released: true
     },
     {
         id: 2,
         title: "relax",
         cover: "img/black.png",
         audio: "mu/relax.mp3",
-        duration: "3:44",
+        duration: "0:00",
         releaseDate: "06.11.25",
         collection: "demim",
-        released: true,
-        bpm: 122
+        released: true
     },
     {
         id: 4,
         title: "Track 1",
         cover: "img/1.png",
         audio: "mu/new1.mp3",
-        duration: "3:44",
+        duration: "0:00",
         releaseDate: "06.11.25",
         collection: "demim",
-        released: true,
-        bpm: 125
+        released: true
     },
     {
         id: 5,
         title: "Track 2",
         cover: "img/1.png",
         audio: "mu/new2.mp3",
-        duration: "3:44",
+        duration: "0:00",
         releaseDate: "06.11.25",
         collection: "demim",
-        released: true,
-        bpm: 125
+        released: true
     },	
     {
         id: 6,
         title: "Track 3",
         cover: "img/1.png",
         audio: "mu/new3.mp3",
-        duration: "3:44",
+        duration: "0:00",
         releaseDate: "06.11.25",
         collection: "demim",
-        released: true,
-        bpm: 125
-    },		
+        released: true
+    }		
 ];
 
 const upcomingRelease = {
@@ -72,8 +67,7 @@ const upcomingRelease = {
     cover: "img/1.png",
     audio: "mu/Project_21.mp3",
     releaseDate: "2025-11-10T00:00:00",
-    preReleaseStart: "2024-12-20T00:00:00",
-    bpm: 130
+    preReleaseStart: "2024-12-20T00:00:00"
 };
 
 class PlayCountTracker {
@@ -103,50 +97,22 @@ class ModernMusicPlayer {
         this.isPlaying = false;
         this.isTransitioning = false;
         this.playTracker = new PlayCountTracker();
-        this.fadeDuration = 12000;
         
-        // Для точной детекции битов
-        this.audioContext = null;
-        this.analyser = null;
-        this.source = null;
-        this.dataArray = null;
-        this.bufferLength = null;
-        this.animationId = null;
+        // Оптимизация: кэш длительностей треков
+        this.durationCache = new Map();
         
-        // Частотные диапазоны для инструментов
-        this.frequencyRanges = {
-            drums: { low: 2000, high: 8000 },  // Высокие частоты - барабаны
-            bass: { low: 20, high: 250 },      // Низкие частоты - бас
-            synth: { low: 250, high: 2000 },   // Средние частоты - синтезатор
-            vocal: { low: 2000, high: 4000 }   // Высокие частоты - вокал
-        };
-        
-        // Пороги срабатывания для каждого инструмента
-        this.thresholds = {
-            drums: 0.6,
-            bass: 0.5,
-            synth: 0.4,
-            vocal: 0.3
-        };
-        
-        // История уровней для каждого инструмента
-        this.levelHistory = {
-            drums: [],
-            bass: [],
-            synth: [],
-            vocal: []
-        };
-
         this.initializeElements();
         this.setupEventListeners();
         this.setupNavigation();
-        this.renderCollections();
-        this.renderTracks();
-        this.checkUpcomingRelease();
-        this.setupProtection();
-        this.updateTotalPlays();
+        this.preloadDurations().then(() => {
+            this.renderCollections();
+            this.renderTracks();
+            this.checkUpcomingRelease();
+            this.updateTotalPlays();
+            document.getElementById('totalTracks').textContent = tracks.filter(t => t.released).length;
+        });
         
-        document.getElementById('totalTracks').textContent = tracks.filter(t => t.released).length;
+        this.setupProtection();
         this.setupAutoplay();
     }
 
@@ -183,43 +149,57 @@ class ModernMusicPlayer {
         this.fsProgressFill = document.getElementById('fsProgressFill');
         this.fsCurrentTime = document.getElementById('fsCurrentTime');
         this.fsTotalTime = document.getElementById('fsTotalTime');
-        this.pulsesContainer = document.querySelector('.gentle-pulses-container');
-        this.coverPulseContainer = document.querySelector('.cover-pulse-container');
-        
-        // Создаем элементы пульсаций для каждого инструмента
-        this.createPulseElements();
     }
 
-    createPulseElements() {
-        // Создаем пульсации для каждого инструмента
-        this.beatPulses = {
-            drums: document.createElement('div'),
-            bass: document.createElement('div'),
-            synth: document.createElement('div'),
-            vocal: document.createElement('div')
-        };
-        
-        // Настраиваем стили для каждого инструмента
-        Object.keys(this.beatPulses).forEach(instrument => {
-            const pulse = this.beatPulses[instrument];
-            pulse.className = `beat-pulse pulse-${instrument}`;
-            this.coverPulseContainer.appendChild(pulse);
+    async preloadDurations() {
+        // Предзагрузка длительностей треков без блокировки интерфейса
+        const promises = tracks.map(track => this.getTrackDuration(track));
+        await Promise.allSettled(promises);
+    }
+
+    async getTrackDuration(track) {
+        if (this.durationCache.has(track.id)) {
+            return this.durationCache.get(track.id);
+        }
+
+        return new Promise((resolve) => {
+            const audio = new Audio();
+            audio.preload = 'metadata';
+            
+            const timeout = setTimeout(() => {
+                audio.removeEventListener('loadedmetadata', loadedHandler);
+                track.duration = "3:44";
+                this.durationCache.set(track.id, track.duration);
+                resolve(track.duration);
+            }, 2000);
+
+            const loadedHandler = () => {
+                clearTimeout(timeout);
+                if (audio.duration && isFinite(audio.duration)) {
+                    track.duration = this.formatTime(audio.duration);
+                } else {
+                    track.duration = "3:44";
+                }
+                this.durationCache.set(track.id, track.duration);
+                resolve(track.duration);
+                audio.remove();
+            };
+
+            audio.addEventListener('loadedmetadata', loadedHandler);
+            audio.addEventListener('error', () => {
+                clearTimeout(timeout);
+                track.duration = "3:44";
+                this.durationCache.set(track.id, track.duration);
+                resolve(track.duration);
+                audio.remove();
+            });
+
+            audio.src = track.audio;
         });
     }
 
     setupAutoplay() {
         const unlockAudio = () => {
-            if (this.audioContext && this.audioContext.state === 'suspended') {
-                this.audioContext.resume();
-            }
-            
-            // Создаем и воспроизводим тихий звук для разблокировки аудио
-            const buffer = this.audioContext.createBuffer(1, 1, 22050);
-            const source = this.audioContext.createBufferSource();
-            source.buffer = buffer;
-            source.connect(this.audioContext.destination);
-            source.start();
-            
             document.removeEventListener('click', unlockAudio);
             document.removeEventListener('touchstart', unlockAudio);
         };
@@ -245,154 +225,34 @@ class ModernMusicPlayer {
         document.getElementById(`${sectionName}-section`).classList.add('active');
     }
 
-    setupAudioAnalyser() {
-        try {
-            this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            this.analyser = this.audioContext.createAnalyser();
-            this.source = this.audioContext.createMediaElementSource(this.audio);
-            
-            // Настройки анализатора для точного определения битов
-            this.analyser.fftSize = 2048;
-            this.analyser.smoothingTimeConstant = 0.8;
-            this.bufferLength = this.analyser.frequencyBinCount;
-            this.dataArray = new Uint8Array(this.bufferLength);
-            
-            // Подключаем цепочку: источник -> анализатор -> выход
-            this.source.connect(this.analyser);
-            this.analyser.connect(this.audioContext.destination);
-            
-            console.log('Audio analyser setup completed');
-            
-        } catch (error) {
-            console.log('Audio context not supported:', error);
-        }
-    }
-
-    startBeatDetection() {
-        if (!this.analyser) return;
-        
-        const analyzeAudio = () => {
-            if (!this.isPlaying) return;
-            
-            // Получаем данные частотного спектра
-            this.analyser.getByteFrequencyData(this.dataArray);
-            
-            // Анализируем каждый инструмент
-            this.analyzeInstrument('drums');
-            this.analyzeInstrument('bass');
-            this.analyzeInstrument('synth');
-            this.analyzeInstrument('vocal');
-            
-            this.animationId = requestAnimationFrame(analyzeAudio);
-        };
-        
-        this.animationId = requestAnimationFrame(analyzeAudio);
-    }
-
-    stopBeatDetection() {
-        if (this.animationId) {
-            cancelAnimationFrame(this.animationId);
-            this.animationId = null;
-        }
-    }
-
-    // Анализ конкретного инструмента по частотному диапазону
-    analyzeInstrument(instrument) {
-        const range = this.frequencyRanges[instrument];
-        const startFreq = this.frequencyToIndex(range.low);
-        const endFreq = this.frequencyToIndex(range.high);
-        
-        let sum = 0;
-        let count = 0;
-        
-        // Суммируем уровни в заданном частотном диапазоне
-        for (let i = startFreq; i <= endFreq; i++) {
-            sum += this.dataArray[i];
-            count++;
-        }
-        
-        if (count === 0) return;
-        
-        const average = sum / count;
-        const normalized = average / 255;
-        
-        // Сохраняем историю уровней
-        this.levelHistory[instrument].push(normalized);
-        if (this.levelHistory[instrument].length > 10) {
-            this.levelHistory[instrument].shift();
-        }
-        
-        // Вычисляем динамический порог на основе истории
-        const dynamicThreshold = this.calculateDynamicThreshold(instrument);
-        
-        // Если уровень превышает порог - активируем пульсацию
-        if (normalized > dynamicThreshold && this.isSignificantPeak(instrument, normalized)) {
-            this.triggerPulse(instrument, normalized);
-        }
-    }
-
-    // Преобразование частоты в индекс массива
-    frequencyToIndex(frequency) {
-        if (!this.audioContext) return 0;
-        const nyquist = this.audioContext.sampleRate / 2;
-        return Math.round(frequency / nyquist * this.bufferLength);
-    }
-
-    // Вычисление динамического порога на основе истории уровней
-    calculateDynamicThreshold(instrument) {
-        const history = this.levelHistory[instrument];
-        if (history.length === 0) return this.thresholds[instrument];
-        
-        const average = history.reduce((sum, val) => sum + val, 0) / history.length;
-        const max = Math.max(...history);
-        
-        // Динамический порог = среднее + (максимум - среднее) * коэффициент
-        return Math.max(this.thresholds[instrument], average + (max - average) * 0.3);
-    }
-
-    // Проверка, является ли пик значительным
-    isSignificantPeak(instrument, currentLevel) {
-        const history = this.levelHistory[instrument];
-        if (history.length < 3) return true;
-        
-        // Пик значителен, если текущий уровень значительно выше предыдущих
-        const recentAverage = history.slice(-3).reduce((sum, val) => sum + val, 0) / 3;
-        return currentLevel > recentAverage * 1.5;
-    }
-
-    // Активация пульсации для инструмента
-    triggerPulse(instrument, intensity) {
-        const pulseElement = this.beatPulses[instrument];
-        if (!pulseElement) return;
-        
-        // Интенсивность влияет на параметры пульсации
-        const scale = 0.8 + (intensity * 0.4);
-        
-        // Применяем стили в зависимости от интенсивности
-        pulseElement.style.transform = `scale(${scale})`;
-        
-        // Активируем пульсацию
-        pulseElement.classList.add('active');
-        
-        // Деактивируем после завершения анимации
-        setTimeout(() => {
-            pulseElement.classList.remove('active');
-        }, this.getPulseDuration(instrument, intensity));
-    }
-
-    getPulseDuration(instrument, intensity) {
-        // Длительность зависит от инструмента и интенсивности
-        const baseDurations = {
-            drums: 400,  // Короткие для барабанов
-            bass: 600,   // Длиннее для баса
-            synth: 500,  // Средние для синтезатора
-            vocal: 700   // Самые длинные для вокала
-        };
-        
-        return baseDurations[instrument] * (0.8 + intensity * 0.4);
-    }
-
     setupEventListeners() {
+        // Делегирование событий для оптимизации
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('.collection-card')) {
+                const card = e.target.closest('.collection-card');
+                const collectionId = card.dataset.collection;
+                this.openCollection(collectionId);
+            }
+            
+            if (e.target.closest('.apple-style-track')) {
+                const card = e.target.closest('.apple-style-track');
+                const trackId = parseInt(card.dataset.trackId);
+                const track = tracks.find(t => t.id === trackId);
+                if (track) {
+                    this.playTrack(track);
+                }
+            }
+            
+            if (e.target.closest('.track-player-play-btn')) {
+                const btn = e.target.closest('.track-player-play-btn');
+                const trackId = parseInt(btn.closest('.apple-style-track').dataset.trackId);
+                const track = tracks.find(t => t.id === trackId);
+                if (track) {
+                    this.playTrack(track);
+                }
+            }
+        });
+
         // Полноэкранный плеер
         this.closeFullscreenBtn.addEventListener('click', () => {
             this.closeFullscreenPlayer();
@@ -428,23 +288,12 @@ class ModernMusicPlayer {
         });
 
         this.audio.addEventListener('ended', () => {
-            this.nextTrackWithFade();
+            this.nextTrack();
         });
 
         this.audio.addEventListener('play', () => {
             this.isPlaying = true;
             this.fsPlayBtn.classList.add('playing');
-            
-            // Запускаем анализ аудио
-            if (!this.audioContext) {
-                this.setupAudioAnalyser();
-            }
-            
-            if (this.audioContext && this.audioContext.state === 'suspended') {
-                this.audioContext.resume();
-            }
-            
-            this.startBeatDetection();
             
             if (this.currentTrack) {
                 this.playTracker.trackPlay(this.currentTrack.id);
@@ -456,44 +305,15 @@ class ModernMusicPlayer {
         this.audio.addEventListener('pause', () => {
             this.isPlaying = false;
             this.fsPlayBtn.classList.remove('playing');
-            this.stopBeatDetection();
         });
 
         this.audio.addEventListener('error', (e) => {
             console.error('Audio error:', e);
-            alert('Ошибка загрузки аудио. Проверьте ссылку на файл.');
         });
 
         // Открытие полноэкранного плеера при клике на обложку в мини-плеере
         this.currentCover.addEventListener('click', () => {
             this.openFullscreenPlayer();
-        });
-
-        // Сборники и треки
-        document.addEventListener('click', (e) => {
-            if (e.target.closest('.collection-card')) {
-                const card = e.target.closest('.collection-card');
-                const collectionId = card.dataset.collection;
-                this.openCollection(collectionId);
-            }
-            
-            if (e.target.closest('.apple-style-track')) {
-                const card = e.target.closest('.apple-style-track');
-                const trackId = parseInt(card.dataset.trackId);
-                const track = tracks.find(t => t.id === trackId);
-                if (track) {
-                    this.playTrack(track);
-                }
-            }
-            
-            if (e.target.closest('.track-player-play-btn')) {
-                const btn = e.target.closest('.track-player-play-btn');
-                const trackId = parseInt(btn.closest('.apple-style-track').dataset.trackId);
-                const track = tracks.find(t => t.id === trackId);
-                if (track) {
-                    this.playTrack(track);
-                }
-            }
         });
 
         // Закрытие модального окна
@@ -549,7 +369,7 @@ class ModernMusicPlayer {
                     </div>
                 `;
             }
-        }, 1000);
+        }, 3000);
     }
 
     renderCollections() {
@@ -582,7 +402,7 @@ class ModernMusicPlayer {
                 <div class="apple-style-track ${isCurrent && this.isPlaying ? 'playing' : ''}" data-track-id="${track.id}">
                     <div class="track-player-container">
                         <img src="${track.cover}" alt="${track.title}" class="track-player-cover" 
-                             onerror="this.src='https://via.placeholder.com/70x70/1a237e/ffffff?text=🎵'">
+                             loading="lazy" onerror="this.src='img/1.png'">
                         <div class="track-player-info">
                             <div class="track-player-title">${track.title}</div>
                             <div class="track-player-artist">CAWERCAT</div>
@@ -632,7 +452,7 @@ class ModernMusicPlayer {
                 <div class="apple-style-track ${isCurrent && this.isPlaying ? 'playing' : ''}" data-track-id="${track.id}">
                     <div class="track-player-container">
                         <img src="${track.cover}" alt="${track.title}" class="track-player-cover"
-                             onerror="this.src='https://via.placeholder.com/70x70/1a237e/ffffff?text=🎵'">
+                             loading="lazy" onerror="this.src='img/1.png'">
                         <div class="track-player-info">
                             <div class="track-player-title">${track.title}</div>
                             <div class="track-player-artist">CAWERCAT</div>
@@ -668,7 +488,7 @@ class ModernMusicPlayer {
             return `
                 <div class="modal-track" data-track-id="${track.id}">
                     <img src="${track.cover}" alt="${track.title}" class="modal-track-cover"
-                         onerror="this.src='https://via.placeholder.com/40x40/1a237e/ffffff?text=🎵'">
+                         loading="lazy" onerror="this.src='img/1.png'">
                     <div class="modal-track-info">
                         <div class="modal-track-name">${track.title}</div>
                         <div class="modal-track-duration">${track.duration}</div>
@@ -677,17 +497,6 @@ class ModernMusicPlayer {
                 </div>
             `;
         }).join('');
-
-        this.modalTracks.querySelectorAll('.modal-track').forEach(trackEl => {
-            trackEl.addEventListener('click', () => {
-                const trackId = parseInt(trackEl.dataset.trackId);
-                const track = tracks.find(t => t.id === trackId);
-                if (track) {
-                    this.playTrack(track);
-                    this.closeCollection();
-                }
-            });
-        });
 
         this.collectionModal.style.display = 'block';
     }
@@ -702,9 +511,7 @@ class ModernMusicPlayer {
         
         this.fullscreenPlayer.classList.add('active');
         this.updateFullscreenPlayerInfo();
-        this.startGentlePulses();
         
-        // Обновляем прогресс
         if (this.audio.duration) {
             this.fsProgressBar.max = this.audio.duration;
             this.fsTotalTime.textContent = this.formatTime(this.audio.duration);
@@ -713,7 +520,6 @@ class ModernMusicPlayer {
 
     closeFullscreenPlayer() {
         this.fullscreenPlayer.classList.remove('active');
-        this.stopGentlePulses();
     }
 
     updateFullscreenPlayerInfo() {
@@ -723,7 +529,6 @@ class ModernMusicPlayer {
             this.fullscreenRelease.textContent = `release: ${this.currentTrack.releaseDate}`;
             this.fullscreenDuration.textContent = this.currentTrack.duration;
             
-            // Обновляем состояние кнопки play/pause
             if (this.isPlaying) {
                 this.fsPlayBtn.classList.add('playing');
             } else {
@@ -732,180 +537,23 @@ class ModernMusicPlayer {
         }
     }
 
-    startGentlePulses() {
-        this.stopGentlePulses();
-        
-        this.pulseInterval = setInterval(() => {
-            this.createGentlePulse();
-        }, 1200);
-    }
-
-    stopGentlePulses() {
-        if (this.pulseInterval) {
-            clearInterval(this.pulseInterval);
-            this.pulseInterval = null;
-        }
-        
-        this.pulsesContainer.innerHTML = '';
-    }
-
-    createGentlePulse() {
-        const pulse = document.createElement('div');
-        pulse.className = 'gentle-pulse';
-        
-        const x = 15 + Math.random() * 70;
-        const y = 15 + Math.random() * 70;
-        const size = 30 + Math.random() * 50;
-        const delay = Math.random() * 0.5;
-        
-        pulse.style.cssText = `
-            top: ${y}%;
-            left: ${x}%;
-            width: ${size}px;
-            height: ${size}px;
-            animation-delay: ${delay}s;
-        `;
-        
-        this.pulsesContainer.appendChild(pulse);
-        
-        setTimeout(() => {
-            if (pulse.parentNode) {
-                pulse.parentNode.removeChild(pulse);
-            }
-        }, 2000);
-    }
-
     // === ВОСПРОИЗВЕДЕНИЕ ТРЕКОВ ===
     playTrack(track) {
         if (this.isTransitioning) return;
         
-        // Если кликаем на тот же трек - пауза/плей
         if (this.currentTrack && this.currentTrack.id === track.id) {
             this.togglePlay();
             return;
         }
         
-        // Если уже играет другой трек - плавный переход
-        if (this.currentTrack && this.isPlaying) {
-            this.crossfadeToTrack(track);
-        } else {
-            // Просто запускаем новый трек
-            this.loadTrack(track);
-            this.audio.play().catch(error => {
-                console.error('Playback failed:', error);
-                alert('Не удалось воспроизвести трек. Проверьте подключение к интернету.');
-            });
-        }
+        this.loadTrack(track);
+        this.audio.play().catch(error => {
+            console.error('Playback failed:', error);
+        });
         
-        // Автоматически открываем полноэкранный плеер
         setTimeout(() => {
             this.openFullscreenPlayer();
         }, 300);
-    }
-
-    crossfadeToTrack(nextTrack) {
-        if (this.isTransitioning) return;
-        
-        this.isTransitioning = true;
-        
-        const currentVolume = this.audio.volume;
-        const nextAudio = new Audio(nextTrack.audio);
-        nextAudio.volume = 0;
-        
-        let startTime = Date.now();
-        
-        const fadeInterval = setInterval(() => {
-            const elapsed = Date.now() - startTime;
-            const progress = Math.min(elapsed / this.fadeDuration, 1);
-            
-            if (progress < 1) {
-                this.audio.volume = Math.max(0, currentVolume - progress);
-                nextAudio.volume = Math.min(1, progress);
-            } else {
-                clearInterval(fadeInterval);
-                this.audio.pause();
-                this.audio = nextAudio;
-                this.setupNewAudioListeners();
-                this.currentTrack = nextTrack;
-                this.updatePlayerInfo();
-                this.highlightCurrentTrack();
-                this.updateFullscreenPlayerInfo();
-                this.isTransitioning = false;
-            }
-        }, 50);
-        
-        nextAudio.play().catch(error => {
-            console.error('Next track playback failed:', error);
-            clearInterval(fadeInterval);
-            this.isTransitioning = false;
-        });
-    }
-
-    nextTrackWithFade() {
-        if (!this.currentTrack || this.isTransitioning) return;
-        
-        const currentIndex = tracks.findIndex(t => t.id === this.currentTrack.id);
-        let nextIndex = (currentIndex + 1) % tracks.length;
-        
-        for (let i = 0; i < tracks.length; i++) {
-            const track = tracks[nextIndex];
-            if (track.released) {
-                this.crossfadeToTrack(track);
-                return;
-            }
-            nextIndex = (nextIndex + 1) % tracks.length;
-        }
-    }
-
-    setupNewAudioListeners() {
-        const audio = this.audio;
-        
-        audio.addEventListener('loadedmetadata', () => {
-            this.fsProgressBar.max = audio.duration;
-            this.fsTotalTime.textContent = this.formatTime(audio.duration);
-        });
-
-        audio.addEventListener('timeupdate', () => {
-            if (audio.duration) {
-                const progress = (audio.currentTime / audio.duration) * 100;
-                this.fsProgressBar.value = audio.currentTime;
-                if (this.fsProgressFill) {
-                    this.fsProgressFill.style.width = `${progress}%`;
-                }
-                this.fsCurrentTime.textContent = this.formatTime(audio.currentTime);
-            }
-        });
-
-        audio.addEventListener('ended', () => {
-            this.nextTrackWithFade();
-        });
-
-        audio.addEventListener('play', () => {
-            this.isPlaying = true;
-            this.fsPlayBtn.classList.add('playing');
-            
-            if (!this.audioContext) {
-                this.setupAudioAnalyser();
-            }
-            
-            if (this.audioContext && this.audioContext.state === 'suspended') {
-                this.audioContext.resume();
-            }
-            
-            this.startBeatDetection();
-            
-            if (this.currentTrack) {
-                this.playTracker.trackPlay(this.currentTrack.id);
-                this.updatePlayCounts();
-                this.updateTotalPlays();
-            }
-        });
-
-        audio.addEventListener('pause', () => {
-            this.isPlaying = false;
-            this.fsPlayBtn.classList.remove('playing');
-            this.stopBeatDetection();
-        });
     }
 
     loadTrack(track) {
@@ -936,7 +584,7 @@ class ModernMusicPlayer {
     }
 
     nextTrack() {
-        if (!this.currentTrack || this.isTransitioning) return;
+        if (!this.currentTrack) return;
         
         const currentIndex = tracks.findIndex(t => t.id === this.currentTrack.id);
         let nextIndex = (currentIndex + 1) % tracks.length;
@@ -952,7 +600,7 @@ class ModernMusicPlayer {
     }
 
     previousTrack() {
-        if (!this.currentTrack || this.isTransitioning) return;
+        if (!this.currentTrack) return;
         
         const currentIndex = tracks.findIndex(t => t.id === this.currentTrack.id);
         let prevIndex = (currentIndex - 1 + tracks.length) % tracks.length;
@@ -1052,10 +700,6 @@ class ModernMusicPlayer {
             this.renderCollections();
             document.getElementById('totalTracks').textContent = tracks.filter(t => t.released).length;
         }
-
-        setInterval(() => {
-            this.preReleaseBanner.classList.toggle('pulse-glow');
-        }, 2000);
     }
 
     startCountdown() {

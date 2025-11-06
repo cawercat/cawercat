@@ -6,7 +6,6 @@
     <title>CAWERCAT • WORLD</title>
     <link rel="stylesheet" href="style.css">
     
-    <!-- Исправленные иконки -->
     <link rel="icon" type="image/x-icon" href="img/icn.png">
     <link rel="apple-touch-icon" href="img/icn.png">
     <meta name="mobile-web-app-capable" content="yes">
@@ -21,11 +20,6 @@
     <!-- Денимовая текстура фона -->
     <div class="denim-texture"></div>
     <div class="denim-stitch-overlay"></div>
-    
-    <!-- Визуализатор -->
-    <div class="visualizer-container" id="visualizerBg">
-        <div class="pulse-orb" id="pulseOrb"></div>
-    </div>
 
     <!-- Основной контейнер -->
     <div class="main-container">
@@ -39,7 +33,7 @@
                 <div class="header-stats">
                     <div class="stat">
                         <span class="stat-number" id="totalPlays">0</span>
-                        <span class="stat-label">ПРОСЛУШИВАНИЙ [в тестовом режиме, данные не точные]</span>
+                        <span class="stat-label">ПРОСЛУШИВАНИЙ</span>
                     </div>
                     <div class="stat">
                         <span class="stat-number" id="totalTracks">0</span>
@@ -59,11 +53,10 @@
                     <div class="rivet"></div>
                 </div>
                 <div class="banner-content">
-                    <img id="banner-cover" src="https://via.placeholder.com/120x120/1a237e/ffffff?text=SOON" 
-                         alt="Следующий релиз" class="banner-cover">
+                    <img id="banner-cover" src="img/1.png" alt="Следующий релиз" class="banner-cover" loading="lazy">
                     <div class="release-info">
-                        <div class="release-label">SOON</div>
-                        <h3 id="banner-title" class="track-title">Название трека</h3>
+                        <div class="release-label">СКОРО</div>
+                        <h3 id="banner-title" class="track-title">idk</h3>
                         <div class="countdown" id="releaseCountdown">
                             <div class="countdown-item">
                                 <span class="number days">00</span>
@@ -118,12 +111,11 @@
             </section>
         </main>
 
-        <!-- Мини-плеер (только обложка и информация) -->
+        <!-- Мини-плеер -->
         <div class="mini-player">
             <div class="mini-player-content">
                 <div class="mini-track-display">
-                    <img id="currentCover" src="https://via.placeholder.com/50x50/1a237e/ffffff?text=C" 
-                         alt="Обложка" class="mini-cover">
+                    <img id="currentCover" src="img/1.png" alt="Обложка" class="mini-cover" loading="lazy">
                     <div class="mini-track-info">
                         <h4 id="currentTitle">Выберите трек</h4>
                         <div class="mini-track-details">
@@ -151,9 +143,8 @@
             <div class="player-main-content">
                 <!-- Левая часть - обложка и информация -->
                 <div class="player-left">
-                    <div class="cover-pulse-container">
-                        <!-- Пульсации будут добавлены через JS -->
-                        <img id="fullscreenCover" src="" alt="Обложка" class="fullscreen-cover">
+                    <div class="cover-container">
+                        <img id="fullscreenCover" src="" alt="Обложка" class="fullscreen-cover" loading="lazy">
                     </div>
                     <div class="track-info-fullscreen">
                         <h1 id="fullscreenTitle">Название трека</h1>
@@ -206,28 +197,7 @@
                 </div>
             </div>
         </div>
-        
-        <!-- Контейнер для нежных пульсаций -->
-        <div class="gentle-pulses-container"></div>
     </div>
-
-    <!-- Секция плейлистов [IN DEV] -->
-    <section class="playlists-section">
-        <h2 class="section-title">ПЛЕЙЛИСТЫ [IN DEV]</h2>
-        <div class="playlists-grid">
-            <div class="playlist-card coming-soon">
-                <div class="playlist-cover">
-                    <div class="coming-soon-overlay">
-                        <span>СКОРО</span>
-                    </div>
-                </div>
-                <div class="playlist-info">
-                    <h3>Мои подборки</h3>
-                    <p>В разработке</p>
-                </div>
-            </div>
-        </div>
-    </section>
 
     <!-- Модальное окно сборника -->
     <div id="collectionModal" class="modal">
