@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CAWERCAT • WORLD</title>
+    <title>CAWERCAT • 09591</title>
     <link rel="stylesheet" href="style.css">
     
+    <!-- Используем новые мета-теги, соответствующие темной теме -->
     <link rel="icon" type="image/x-icon" href="img/icn.png">
     <link rel="apple-touch-icon" href="img/icn.png">
     <meta name="mobile-web-app-capable" content="yes">
@@ -13,186 +14,147 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="CAWERCAT">
     
-    <meta name="theme-color" content="#1a237e">
+    <meta name="theme-color" content="#111111">
     <meta property="og:image" content="img/icn.png">
 </head>
 <body>
-    <!-- Денимовая текстура фона -->
-    <div class="denim-texture"></div>
-    <div class="denim-stitch-overlay"></div>
-
+    <!-- Глючный/Неоновый Фон -->
+    <div class="glitch-background"></div>
+    <div class="noise-overlay"></div>
+    
     <!-- Основной контейнер -->
     <div class="main-container">
         <!-- Хедер -->
-        <header class="denim-header">
+        <header class="cyber-header">
             <div class="header-content">
-                <h1 class="artist-name">
-                    <span class="name-text">CAWERCAT</span>
-                    <span class="era-badge">WORLD</span>
-                </h1>
-                <div class="header-stats">
-                    <div class="stat">
-                        <span class="stat-number" id="totalPlays">0</span>
-                        <span class="stat-label">ПРОСЛУШИВАНИЙ</span>
-                    </div>
-                    <div class="stat">
-                        <span class="stat-number" id="totalTracks">0</span>
-                        <span class="stat-label">ТРЕКОВ</span>
-                    </div>
+                <h1 class="logo-title">CAWERCAT</h1>
+                <div class="artist-info">
+                    <span class="artist-name">151 948 885 999 111 888 555 99912 0091</span>
+                </div>
+            </div>
+            <div class="header-stats">
+                <!-- Статистика или релиз -->
+                <div class="stat-item">
+                    <span class="stat-number" id="totalTracks">0</span>
+                    <span class="stat-label">TRACKS</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">2025</span>
+                    <span class="stat-label">GEN.</span>
                 </div>
             </div>
         </header>
 
-        <!-- Баннер релиза -->
-        <div id="pre-release-banner" class="release-banner">
-            <div class="banner-denim-frame">
-                <div class="denim-rivets">
-                    <div class="rivet"></div>
-                    <div class="rivet"></div>
-                    <div class="rivet"></div>
-                    <div class="rivet"></div>
-                </div>
-                <div class="banner-content">
-                    <img id="banner-cover" src="img/1.png" alt="Следующий релиз" class="banner-cover" loading="lazy">
-                    <div class="release-info">
-                        <div class="release-label">СКОРО</div>
-                        <h3 id="banner-title" class="track-title">idk</h3>
-                        <div class="countdown" id="releaseCountdown">
-                            <div class="countdown-item">
-                                <span class="number days">00</span>
-                                <span class="label">ДНЕЙ</span>
-                            </div>
-                            <div class="countdown-separator">:</div>
-                            <div class="countdown-item">
-                                <span class="number hours">00</span>
-                                <span class="label">ЧАСОВ</span>
-                            </div>
-                            <div class="countdown-separator">:</div>
-                            <div class="countdown-item">
-                                <span class="number minutes">00</span>
-                                <span class="label">МИНУТ</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+        <!-- Баннер с отсчетом (если нужен) -->
+        <section class="banner-section">
+            <div class="banner-content" id="releaseCountdown">
+                <!-- Контент отсчета будет вставлен JS, используя класс .countdown-item -->
+            </div>
+        </section>
+
+        <!-- Треки -->
+        <section class="tracks-section">
+            <h2 class="section-title">AUDIO LOGS // INVENTORY</h2>
+            <div class="tracks-list" id="tracksList">
+                <!-- Треки будут вставлены сюда -->
+            </div>
+        </section>
+        
+        <!-- Сборники/Коллекции -->
+        <section class="collections-section">
+            <h2 class="section-title">ARCHIVES // COLLECTIONS</h2>
+            <div class="collections-grid" id="collectionsGrid">
+                <!-- Коллекции будут вставлены сюда -->
+            </div>
+        </section>
+    </div>
+
+    <!-- Мини-плеер (Footer) -->
+    <div class="track-player-container" id="playerContainer">
+        <div class="track-player-info">
+            <div class="track-player-cover" id="playerCover"></div>
+            <div class="track-player-details">
+                <span class="track-player-title" id="playerTitle">SELECT LOG</span>
+                <span class="track-player-artist" id="playerArtist">CAWERCAT</span>
             </div>
         </div>
-
-        <!-- Основной контент -->
-        <main class="content-area">
-            <!-- Навигация -->
-            <nav class="section-nav">
-                <button class="nav-btn active" data-section="collections">СБОРНИКИ</button>
-                <button class="nav-btn" data-section="tracks">ВСЕ ТРЕКИ</button>
-            </nav>
-
-            <!-- Секция сборников -->
-            <section id="collections-section" class="section active">
-                <div class="collections-grid">
-                    <!-- Сборники через JS -->
-                </div>
-            </section>
-
-            <!-- Секция всех треков -->
-            <section id="tracks-section" class="section">
-                <div class="tracks-header">
-                    <h3>ДИСКОГРАФИЯ</h3>
-                    <div class="sort-controls">
-                        <select id="sortSelect" class="denim-select">
-                            <option value="newest">Сначала новые</option>
-                            <option value="oldest">Сначала старые</option>
-                            <option value="popular">По популярности</option>
-                        </select>
-                    </div>
-                </div>
-                <div id="tracks-grid" class="tracks-grid">
-                    <!-- Треки через JS -->
-                </div>
-            </section>
-        </main>
-
-        <!-- Мини-плеер -->
-        <div class="mini-player">
-            <div class="mini-player-content">
-                <div class="mini-track-display">
-                    <img id="currentCover" src="img/1.png" alt="Обложка" class="mini-cover" loading="lazy">
-                    <div class="mini-track-info">
-                        <h4 id="currentTitle">Выберите трек</h4>
-                        <div class="mini-track-details">
-                            <span id="currentRelease" class="mini-release-date">release: --.--.--</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        
+        <div class="track-player-controls">
+            <button class="track-player-btn prev-btn" id="playerPrevBtn">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
+            </button>
+            <button class="track-player-btn play-btn" id="playerPlayBtn">
+                <!-- Иконки будут переключаться JS -->
+                <svg class="icon-play" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                <svg class="icon-pause" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+            </button>
+            <button class="track-player-btn next-btn" id="playerNextBtn">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 18h2V6h-2zm-8.5 6V6l8.5 6z"/></svg>
+            </button>
         </div>
+        
+        <div class="track-player-progress">
+            <span class="time-display" id="playerCurrentTime">0:00</span>
+            <div class="progress-bar-container">
+                <div class="progress-fill" id="playerProgressFill"></div>
+                <input type="range" id="playerProgressBar" class="progress-bar" value="0" min="0" max="100">
+            </div>
+            <span class="time-display" id="playerTotalTime">0:00</span>
+        </div>
+        
+        <button class="track-player-btn open-fullscreen-btn" id="openFullscreenBtn">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg>
+        </button>
     </div>
 
     <!-- Полноэкранный плеер -->
-    <div id="fullscreenPlayer" class="fullscreen-player">
-        <div class="player-backdrop"></div>
-        
+    <div class="fullscreen-player" id="fullscreenPlayer">
+        <button class="close-fullscreen-player glitch-btn" id="closeFullscreenBtn">
+            <span>CLOSE / LOG OUT</span>
+        </button>
         <div class="fullscreen-player-content">
-            <!-- Кнопка закрытия -->
-            <button class="close-fullscreen-player">
-                <svg viewBox="0 0 24 24" width="24" height="24">
-                    <path fill="currentColor" d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
-                </svg>
-            </button>
+            <div class="fs-cover-container">
+                <div class="fs-cover-frame glitch-frame">
+                    <div class="fs-cover-image" id="fsCover"></div>
+                </div>
+            </div>
             
-            <!-- Контент плеера -->
-            <div class="player-main-content">
-                <!-- Левая часть - обложка и информация -->
-                <div class="player-left">
-                    <div class="cover-container">
-                        <img id="fullscreenCover" src="" alt="Обложка" class="fullscreen-cover" loading="lazy">
-                    </div>
-                    <div class="track-info-fullscreen">
-                        <h1 id="fullscreenTitle">Название трека</h1>
-                        <div class="track-meta-fullscreen">
-                            <span id="fullscreenRelease">release: --.--.--</span>
-                            <span class="separator">•</span>
-                            <span id="fullscreenDuration">0:00</span>
-                        </div>
+            <div class="fs-details-controls">
+                <div class="fs-track-info">
+                    <span class="fs-track-title" id="fsTitle">LOADING...</span>
+                    <span class="fs-track-artist" id="fsArtist">CAWERCAT</span>
+                </div>
+                
+                <div class="fs-controls">
+                    <div class="fs-btn-row">
+                        <button class="fs-btn shuffle-btn" id="fsShuffleBtn">
+                            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M14.83 14.83a2 2 0 1 1-2.828 2.828 2 2 0 0 1 2.828-2.828zM17 19H7a3 3 0 0 1-3-3v-4h2v4a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1v-4h2v4a3 3 0 0 1-3 3zm-2.83-11.83a2 2 0 1 1-2.828-2.828 2 2 0 0 1 2.828 2.828zM17 5h-4l-3-3-3 3H7a3 3 0 0 0-3 3v4h2V8a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v4h2V8a3 3 0 0 0-3-3z"/></svg>
+                        </button>
+                        <button class="fs-btn prev-btn large" id="fsPrevBtn">
+                            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
+                        </button>
+                        <button class="fs-btn play-btn large" id="fsPlayBtn">
+                            <svg class="icon-play" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                            <svg class="icon-pause" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                        </button>
+                        <button class="fs-btn next-btn large" id="fsNextBtn">
+                            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 18h2V6h-2zm-8.5 6V6l8.5 6z"/></svg>
+                        </button>
+                        <button class="fs-btn repeat-btn" id="fsRepeatBtn">
+                            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v3z"/></svg>
+                        </button>
                     </div>
                 </div>
                 
-                <!-- Правая часть - управление -->
-                <div class="player-right">
-                    <div class="fullscreen-controls">
-                        <button id="fsPrevBtn" class="control-btn large">
-                            <svg viewBox="0 0 24 24" width="32" height="32">
-                                <path fill="currentColor" d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/>
-                            </svg>
-                        </button>
-                        
-                        <button id="fsPlayBtn" class="play-btn large">
-                            <svg viewBox="0 0 24 24" width="40" height="40" class="play-icon">
-                                <path fill="currentColor" d="M8 5v14l11-7z"/>
-                            </svg>
-                            <svg viewBox="0 0 24 24" width="40" height="40" class="pause-icon">
-                                <path fill="currentColor" d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
-                            </svg>
-                        </button>
-                        
-                        <button id="fsNextBtn" class="control-btn large">
-                            <svg viewBox="0 0 24 24" width="32" height="32">
-                                <path fill="currentColor" d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/>
-                            </svg>
-                        </button>
+                <div class="fs-progress-container">
+                    <div class="progress-bar-large-container">
+                        <div class="progress-fill-large" id="fsProgressFill"></div>
+                        <input type="range" id="fsProgressBar" class="progress-bar-large" value="0" min="0" max="100">
                     </div>
-                    
-                    <!-- Прогресс бар -->
-                    <div class="fullscreen-progress">
-                        <div class="progress-container-large">
-                            <div class="progress-background-large"></div>
-                            <div class="progress-fill-large" id="fsProgressFill"></div>
-                            <input type="range" id="fsProgressBar" class="progress-bar-large" value="0" min="0" max="100">
-                        </div>
-                        <div class="time-display-large">
-                            <span id="fsCurrentTime">0:00</span>
-                            <span class="time-separator">/</span>
-                            <span id="fsTotalTime">0:00</span>
-                        </div>
+                    <div class="time-display-large">
+                        <span id="fsCurrentTime">0:00</span>
+                        <span class="time-separator">//</span>
+                        <span id="fsTotalTime">0:00</span>
                     </div>
                 </div>
             </div>
@@ -201,18 +163,12 @@
 
     <!-- Модальное окно сборника -->
     <div id="collectionModal" class="modal">
-        <div class="modal-denim-frame">
-            <div class="modal-rivets">
-                <div class="rivet"></div>
-                <div class="rivet"></div>
-                <div class="rivet"></div>
-                <div class="rivet"></div>
-            </div>
+        <div class="underground-modal-frame">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h2 id="modalTitle">COLLECTION</h2>
-                    <button class="close-modal denim-btn">
-                        <span>&times;</span>
+                    <h2 id="modalTitle">ARCHIVE</h2>
+                    <button class="close-modal glitch-btn">
+                        <span>X / EXIT</span>
                     </button>
                 </div>
                 <div id="modalTracks" class="modal-tracks">
