@@ -78,7 +78,7 @@ const tracks = [
     },
     {
         id: 7,
-        title: "NEW // L,On9mOi8J ",
+        title: "LOG // L,On9mOi8J ",
         cover: "img/1.png",
         audio: "mu/Project_11.mp3",
         duration: "0:00",
@@ -88,13 +88,13 @@ const tracks = [
     },
     {
         id: 8,
-        title: "LOG // Q4 SOON",
+        title: "LOG // J9u8s5T",
         cover: "img/1.png",
-        audio: "mu/new5.mp3",
+        audio: "mu/Project_12.mp3",
         duration: "0:00",
-        releaseDate: "11.11.25",
+        releaseDate: "09.11.25",
         collection: "new_archive",
-        released: false
+        released: true
     }
 ];
 
@@ -158,7 +158,7 @@ class MusicPlayerApp {
         this.renderCollections();
         this.setupEventListeners();
         this.updateTotalTracksCount();
-        this.startCountdownTimer('11/11/2025 00:00:00'); 
+        this.startCountdownTimer('09/11/2025 00:00:00'); 
     }
     
     // --- Утилиты ---
