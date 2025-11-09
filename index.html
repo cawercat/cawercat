@@ -5,23 +5,48 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>CAWERCAT • 09591</title>
     <link rel="stylesheet" href="style.css">
-    
-    <!-- Используем новые мета-теги, соответствующие темной теме -->
     <link rel="icon" type="image/x-icon" href="img/icn.png">
-    <link rel="apple-touch-icon" href="img/icn.png">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="CAWERCAT">
-    
     <meta name="theme-color" content="#111111">
-    <meta property="og:image" content="img/icn.png">
 </head>
 <body>
     <!-- Глючный/Неоновый Фон -->
     <div class="glitch-background"></div>
     <div class="noise-overlay"></div>
     
+    <!-- Переключатель тем -->
+    <div class="theme-switcher-wrapper">
+        <div class="theme-switcher">
+            <button class="theme-btn active" data-theme="cyber" title="Кибер-стиль">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2C13.1 2 14 2.9 14 4C14 5.1 13.1 6 12 6C10.9 6 10 5.1 10 4C10 2.9 10.9 2 12 2ZM21 9V7L15 5.5V7H9V5.5L3 7V9L9 10.5V12L3 13.5V15.5L9 14V16L3 17.5V19.5L9 18V22H15V18L21 19.5V17.5L15 16V14L21 15.5V13.5L15 12V10.5L21 9Z"/>
+                </svg>
+            </button>
+            <button class="theme-btn" data-theme="minimal" title="Минимализм">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M3,3H21V21H3V3M5,5V19H19V5H5Z"/>
+                </svg>
+            </button>
+            <button class="theme-btn" data-theme="monochrome" title="Черно-белый">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M17.5,12A1.5,1.5 0 0,1 16,10.5A1.5,1.5 0 0,1 17.5,9A1.5,1.5 0 0,1 19,10.5A1.5,1.5 0 0,1 17.5,12M14.5,8A1.5,1.5 0 0,1 13,6.5A1.5,1.5 0 0,1 14.5,5A1.5,1.5 0 0,1 16,6.5A1.5,1.5 0 0,1 14.5,8M9.5,8A1.5,1.5 0 0,1 8,6.5A1.5,1.5 0 0,1 9.5,5A1.5,1.5 0 0,1 11,6.5A1.5,1.5 0 0,1 9.5,8M6.5,12A1.5,1.5 0 0,1 5,10.5A1.5,1.5 0 0,1 6.5,9A1.5,1.5 0 0,1 8,10.5A1.5,1.5 0 0,1 6.5,12M12,3A9,9 0 0,0 3,12A9,9 0 0,0 12,21A9,9 0 0,0 21,12A9,9 0 0,0 12,3Z"/>
+                </svg>
+            </button>
+            <button class="theme-btn" data-theme="winter" title="Зимний кибер">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12,1A3,3 0 0,1 15,4A3,3 0 0,1 12,7A3,3 0 0,1 9,4A3,3 0 0,1 12,1M12,14A3,3 0 0,1 15,17A3,3 0 0,1 12,20A3,3 0 0,1 9,17A3,3 0 0,1 12,14M12,8A3,3 0 0,1 15,11A3,3 0 0,1 12,14A3,3 0 0,1 9,11A3,3 0 0,1 12,8M1,10A3,3 0 0,1 4,13A3,3 0 0,1 1,16A3,3 0 0,1 -2,13A3,3 0 0,1 1,10M23,10A3,3 0 0,1 26,13A3,3 0 0,1 23,16A3,3 0 0,1 20,13A3,3 0 0,1 23,10Z"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Подсказка тем -->
+    <div class="theme-tutorial" id="themeTutorial">
+        <div class="tutorial-content">
+            <span class="tutorial-text">Ты можешь изменить внешний вид сайта нажав на одну из этих кнопок</span>
+            <button class="tutorial-close" id="closeTutorial">✕</button>
+        </div>
+    </div>
+
     <!-- Основной контейнер -->
     <div class="main-container">
         <!-- Хедер -->
@@ -33,7 +58,6 @@
                 </div>
             </div>
             <div class="header-stats">
-                <!-- Статистика или релиз -->
                 <div class="stat-item">
                     <span class="stat-number" id="totalTracks">0</span>
                     <span class="stat-label">TRACKS</span>
@@ -45,10 +69,20 @@
             </div>
         </header>
 
-        <!-- Баннер с отсчетом (если нужен) -->
+        <!-- Баннер с отсчетом -->
         <section class="banner-section">
             <div class="banner-content" id="releaseCountdown">
-                <!-- Контент отсчета будет вставлен JS, используя класс .countdown-item -->
+                <!-- Контент отсчета будет вставлен JS -->
+            </div>
+        </section>
+
+        <!-- Таймлайн -->
+        <section class="timeline-section">
+            <h2 class="section-title">RELEASE TIMELINE // CHRONOLOGY</h2>
+            <div class="timeline-container">
+                <div class="timeline-track" id="timelineTrack">
+                    <!-- Таймлайн будет вставлен сюда -->
+                </div>
             </div>
         </section>
 
@@ -84,7 +118,6 @@
                 <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
             </button>
             <button class="track-player-btn play-btn" id="playerPlayBtn">
-                <!-- Иконки будут переключаться JS -->
                 <svg class="icon-play" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
                 <svg class="icon-pause" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
             </button>
