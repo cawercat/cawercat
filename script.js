@@ -1,17 +1,17 @@
 // Конфигурация - Обновлены цвета для соответствия новой теме
 const collections = {
     demim: {
-        name: "WELCOME",
+        name: "Last Release",
         tracks: [1, 2, 4, 5, 6],
         // Используем неоновый цвет, соответствующий дизайну
         color: "#00FFFF", 
         description: "EXP // INITIALIZATION LOG"
     },
     new_archive: {
-        name: "SOON",
+        name: "NEW",
         tracks: [7, 8],
         color: "#FF00FF", // Используем другой неоновый цвет
-        description: "LOGS // FUTURE DEVELOPMENT"
+        description: "LOGS // NEW MELODY (09.11)"
     }
 };
 
@@ -78,13 +78,13 @@ const tracks = [
     },
     {
         id: 7,
-        title: "LOG // SOON ",
+        title: "NEW // L,On9mOi8J ",
         cover: "img/1.png",
-        audio: "mu/new4.mp3",
+        audio: "mu/Project_11.mp3",
         duration: "0:00",
-        releaseDate: "01.01.26",
+        releaseDate: "09.11.26",
         collection: "new_archive",
-        released: false
+        released: true
     },
     {
         id: 8,
@@ -92,7 +92,7 @@ const tracks = [
         cover: "img/1.png",
         audio: "mu/new5.mp3",
         duration: "0:00",
-        releaseDate: "01.01.26",
+        releaseDate: "11.11.25",
         collection: "new_archive",
         released: false
     }
