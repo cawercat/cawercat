@@ -1,16 +1,16 @@
+// script.js
 // Конфигурация - Обновлены цвета для соответствия новой теме
 const collections = {
     demim: {
         name: "Last Release",
         tracks: [1, 2, 4, 5, 6],
-        // Используем неоновый цвет, соответствующий дизайну
         color: "#00FFFF", 
         description: "EXP // INITIALIZATION LOG"
     },
     new_archive: {
         name: "NEW",
-        tracks: [7, 8],
-        color: "#FF00FF", // Используем другой неоновый цвет
+        tracks: [7, 8, 9],
+        color: "#FF00FF",
         description: "LOGS // NEW MELODY (09.11)"
     }
 };
@@ -82,7 +82,7 @@ const tracks = [
         cover: "img/1.png",
         audio: "mu/Project_11.mp3",
         duration: "0:00",
-        releaseDate: "09.11.26",
+        releaseDate: "09.11.25",
         collection: "new_archive",
         released: true
     },
@@ -95,7 +95,17 @@ const tracks = [
         releaseDate: "09.11.25",
         collection: "new_archive",
         released: true
-    }
+    },
+    {
+        id: 9,
+        title: "LOG // SUMMER",
+        cover: "img/icn.png",
+        audio: "mu/Project_13.mp3",
+        duration: "0:00",
+        releaseDate: "10.11.25",
+        collection: "new_archive",
+        released: true
+    }	
 ];
 
 // Класс для управления всем приложением
@@ -103,20 +113,19 @@ class MusicPlayerApp {
     constructor() {
         this.audio = new Audio();
         this.currentTrackIndex = -1;
-        this.currentPlaylist = tracks.filter(t => t.released); // Начальный плейлист - только выпущенные треки
+        this.currentPlaylist = tracks.filter(t => t.released);
         this.isPlaying = false;
         this.isShuffling = false;
-        this.repeatMode = 'none'; // 'none', 'one', 'all'
+        this.repeatMode = 'none';
         
-        // --- DOM Elements (Обновлены для соответствия HTML) ---
-        
-        // Секции
+        // DOM Elements
         this.tracksList = document.getElementById('tracksList');
         this.collectionsGrid = document.getElementById('collectionsGrid');
         this.totalTracksEl = document.getElementById('totalTracks');
         this.releaseCountdown = document.getElementById('releaseCountdown');
+        this.timelineTrack = document.getElementById('timelineTrack');
 
-        // Мини-плеер (Футер)
+        // Player elements
         this.playerContainer = document.getElementById('playerContainer');
         this.playerCover = document.getElementById('playerCover');
         this.playerTitle = document.getElementById('playerTitle');
@@ -129,7 +138,7 @@ class MusicPlayerApp {
         this.playerTotalTime = document.getElementById('playerTotalTime');
         this.openFullscreenBtn = document.getElementById('openFullscreenBtn');
 
-        // Полноэкранный плеер
+        // Fullscreen player
         this.fullscreenPlayer = document.getElementById('fullscreenPlayer');
         this.closeFullscreenBtn = document.getElementById('closeFullscreenBtn');
         this.fsCover = document.getElementById('fsCover');
@@ -144,11 +153,16 @@ class MusicPlayerApp {
         this.fsShuffleBtn = document.getElementById('fsShuffleBtn');
         this.fsRepeatBtn = document.getElementById('fsRepeatBtn');
 
-        // Модальное окно
+        // Modal
         this.collectionModal = document.getElementById('collectionModal');
         this.modalTitle = document.getElementById('modalTitle');
         this.modalTracks = document.getElementById('modalTracks');
         this.closeModalBtn = this.collectionModal.querySelector('.close-modal');
+
+        // Theme management
+        this.themeButtons = document.querySelectorAll('.theme-btn');
+        this.themeTutorial = document.getElementById('themeTutorial');
+        this.closeTutorialBtn = document.getElementById('closeTutorial');
 
         this.init();
     }
@@ -156,11 +170,128 @@ class MusicPlayerApp {
     init() {
         this.renderTracks();
         this.renderCollections();
+        this.renderTimeline();
         this.setupEventListeners();
+        this.setupThemeSystem();
         this.updateTotalTracksCount();
-        this.startCountdownTimer('09/11/2025 00:00:00'); 
+        this.startCountdownTimer('09/11/2025 00:00:00');
     }
     
+    // --- Таймлайн ---
+    
+    renderTimeline() {
+        const releases = this.extractReleasesFromTracks();
+        releases.sort((a, b) => new Date(b.date) - new Date(a.date));
+        
+        this.timelineTrack.innerHTML = '';
+        
+        releases.forEach((release, index) => {
+            const timelineItem = this.createTimelineItem(release, index === 0);
+            this.timelineTrack.appendChild(timelineItem);
+        });
+    }
+
+    extractReleasesFromTracks() {
+        const releasesMap = new Map();
+        
+        tracks.forEach(track => {
+            const album = collections[track.collection];
+            if (!album) return;
+            
+            const releaseKey = track.releaseDate + '_' + track.collection;
+            
+            if (!releasesMap.has(releaseKey)) {
+                releasesMap.set(releaseKey, {
+                    date: this.parseDate(track.releaseDate),
+                    displayDate: track.releaseDate,
+                    title: album.name,
+                    type: this.getReleaseType(track.collection),
+                    cover: track.cover,
+                    tracks: [],
+                    collection: track.collection
+                });
+            }
+            
+            releasesMap.get(releaseKey).tracks.push(track);
+        });
+        
+        return Array.from(releasesMap.values());
+    }
+
+    parseDate(dateString) {
+        const [day, month, year] = dateString.split('.').map(Number);
+        return new Date(2000 + year, month - 1, day);
+    }
+
+    getReleaseType(collectionKey) {
+        const collection = collections[collectionKey];
+        const trackCount = collection.tracks.length;
+        
+        if (trackCount >= 8) return 'ALBUM';
+        if (trackCount >= 4) return 'EP';
+        return 'SINGLE';
+    }
+
+    createTimelineItem(release, isCurrent) {
+        const item = document.createElement('div');
+        item.className = `timeline-item ${isCurrent ? 'current' : ''}`;
+        item.dataset.collection = release.collection;
+        
+        item.innerHTML = `
+            <div class="timeline-date">${release.displayDate}</div>
+            <div class="timeline-title">${release.title}</div>
+            <div class="timeline-type">${release.type}</div>
+            <div class="timeline-cover" style="background-image: url('${release.cover}')"></div>
+            <div class="timeline-tracks">${release.tracks.length} TRACKS</div>
+        `;
+
+        item.addEventListener('click', () => {
+            this.openCollectionModal(release.collection);
+        });
+
+        return item;
+    }
+
+    // --- Система тем ---
+    
+    setupThemeSystem() {
+        // Проверяем сохраненную тему
+        const savedTheme = localStorage.getItem('cawercat-theme') || 'cyber';
+        this.setTheme(savedTheme);
+        
+        // Настройка кнопок переключения
+        this.themeButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const theme = btn.dataset.theme;
+                this.setTheme(theme);
+            });
+        });
+
+        // Закрытие подсказки
+        this.closeTutorialBtn.addEventListener('click', () => {
+            this.themeTutorial.style.display = 'none';
+            localStorage.setItem('cawercat-tutorial-shown', 'true');
+        });
+
+        // Показываем подсказку только при первом посещении
+        if (!localStorage.getItem('cawercat-tutorial-shown')) {
+            setTimeout(() => {
+                this.themeTutorial.style.display = 'block';
+            }, 1000);
+        }
+    }
+
+    setTheme(themeName) {
+        // Обновляем активную кнопку
+        this.themeButtons.forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.theme === themeName);
+        });
+
+        // Устанавливаем тему
+        document.documentElement.setAttribute('data-theme', themeName);
+        localStorage.setItem('cawercat-theme', themeName);
+    }
+
     // --- Утилиты ---
 
     formatTime(seconds) {
@@ -170,9 +301,7 @@ class MusicPlayerApp {
         return `${mins}:${secs.toString().padStart(2, '0')}`;
     }
 
-    // Функция для осветления цвета (используется для динамических стилей, если нужно)
     lightenColor(color, percent) {
-        // ... (функция осветления остается прежней)
         const num = parseInt(color.replace("#", ""), 16);
         const amt = Math.round(2.55 * percent);
         const R = (num >> 16) + amt;
@@ -186,11 +315,7 @@ class MusicPlayerApp {
         ).toString(16).slice(1);
     }
     
-    // Функция для установки цвета, если это необходимо
     setAccentColor(color) {
-        // В новой "андерграунд" теме мы минимизируем изменение всего сайта,
-        // но можем подкрасить прогресс-бар в цвет коллекции, если нужно.
-        // Здесь оставляем функцию на случай будущих изменений, но в CSS жестко заданы неоновые цвета.
         document.documentElement.style.setProperty('--track-accent-color', color);
     }
     
@@ -261,7 +386,6 @@ class MusicPlayerApp {
 
         const trackIndexInPlaylist = this.currentPlaylist.findIndex(t => t.id === trackId);
         if (trackIndexInPlaylist === -1) {
-             // Если трек не в текущем плейлисте, возможно, нужно обновить плейлист
              this.currentPlaylist = tracks.filter(t => t.released);
              this.currentTrackIndex = this.currentPlaylist.findIndex(t => t.id === trackId);
         } else {
@@ -277,25 +401,20 @@ class MusicPlayerApp {
     updatePlayerInfo(track) {
         const collection = collections[track.collection] || { name: 'UNKNOWN' };
         
-        // Мини-плеер
         this.playerTitle.textContent = track.title;
         this.playerCover.style.backgroundImage = `url('${track.cover}')`;
-        // Полноэкранный плеер
         this.fsTitle.textContent = track.title;
         this.fsCover.style.backgroundImage = `url('${track.cover}')`;
         this.playerContainer.style.display = 'flex';
         
-        // Обновляем общий тайминг (нужно получить после загрузки метаданных)
         this.audio.onloadedmetadata = () => {
             this.playerTotalTime.textContent = this.formatTime(this.audio.duration);
             this.fsTotalTime.textContent = this.formatTime(this.audio.duration);
-            // Если длительность в данных была "0:00", обновляем ее
             const trackData = tracks.find(t => t.id === track.id);
             if (trackData.duration === "0:00") {
                 trackData.duration = this.formatTime(this.audio.duration);
-                // Перерисовываем список треков, чтобы обновить длительность
                 this.renderTracks();
-                this.updateActiveTrackHighlight(track.id); // Восстанавливаем выделение
+                this.updateActiveTrackHighlight(track.id);
             }
         };
     }
@@ -318,7 +437,6 @@ class MusicPlayerApp {
     
     togglePlayPause() {
         if (this.currentTrackIndex === -1) {
-            // Если ничего не выбрано, загружаем первый трек
             const firstTrack = this.currentPlaylist[0];
             if (firstTrack) this.loadTrack(firstTrack.id);
             return;
@@ -351,13 +469,13 @@ class MusicPlayerApp {
         if (this.currentPlaylist.length === 0) return;
         
         if (this.audio.currentTime > 3) {
-            this.audio.currentTime = 0; // Начать заново, если проиграно > 3 сек
+            this.audio.currentTime = 0;
             return;
         }
         
         let prevIndex = this.currentTrackIndex - 1;
         if (prevIndex < 0) {
-            prevIndex = this.currentPlaylist.length - 1; // Зацикливание назад
+            prevIndex = this.currentPlaylist.length - 1;
         }
         this.currentTrackIndex = prevIndex;
         this.loadTrack(this.currentPlaylist[this.currentTrackIndex].id);
@@ -383,11 +501,9 @@ class MusicPlayerApp {
         this.playerPrevBtn.addEventListener('click', () => this.playPrev());
         this.fsPrevBtn.addEventListener('click', () => this.playPrev());
 
-        // Прогресс-бар (мини-плеер)
+        // Прогресс-бар
         this.playerProgressBar.addEventListener('input', () => this.seek(this.playerProgressBar.value));
         this.playerProgressBar.addEventListener('change', () => this.seek(this.playerProgressBar.value));
-        
-        // Прогресс-бар (полноэкранный)
         this.fsProgressBar.addEventListener('input', () => this.seek(this.fsProgressBar.value, true));
         this.fsProgressBar.addEventListener('change', () => this.seek(this.fsProgressBar.value, true));
 
@@ -411,7 +527,6 @@ class MusicPlayerApp {
         const time = (this.audio.duration / 100) * value;
         this.audio.currentTime = time;
         
-        // Обновляем ползунки и полосы заполнения в реальном времени
         const progressFill = isFullscreen ? this.fsProgressFill : this.playerProgressFill;
         const progressBar = isFullscreen ? this.fsProgressBar : this.playerProgressBar;
         
@@ -423,12 +538,10 @@ class MusicPlayerApp {
         if (this.audio.duration) {
             const progressPercent = (this.audio.currentTime / this.audio.duration) * 100;
             
-            // Мини-плеер
             this.playerProgressFill.style.width = `${progressPercent}%`;
             this.playerProgressBar.value = progressPercent;
             this.playerCurrentTime.textContent = this.formatTime(this.audio.currentTime);
 
-            // Полноэкранный плеер
             this.fsProgressFill.style.width = `${progressPercent}%`;
             this.fsProgressBar.value = progressPercent;
             this.fsCurrentTime.textContent = this.formatTime(this.audio.currentTime);
@@ -451,8 +564,6 @@ class MusicPlayerApp {
     toggleShuffle() {
         this.isShuffling = !this.isShuffling;
         this.fsShuffleBtn.classList.toggle('active', this.isShuffling);
-        
-        // Визуальное изменение для андерграунд стиля
         this.fsShuffleBtn.style.borderColor = this.isShuffling ? '#FF00FF' : 'var(--text-primary)';
         this.fsShuffleBtn.style.color = this.isShuffling ? '#FF00FF' : 'var(--text-primary)';
     }
@@ -472,15 +583,14 @@ class MusicPlayerApp {
 
         const iconPath = this.fsRepeatBtn.querySelector('svg path');
         
-        // Обновление иконки и стиля
         let color = 'var(--text-primary)';
-        let pathD = 'M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v3z'; // Иконка повтора
+        let pathD = 'M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v3z';
         
         if (this.repeatMode === 'all') {
             color = '#00FFFF';
         } else if (this.repeatMode === 'one') {
             color = '#FF00FF';
-            pathD = 'M13 15h2v4h-2zm-6-4h2v4H7zm0 8h10v-3l4 4-4 4v-3H5V9h2v10zM17 7H7V4l-4 4 4 4V9h10v4l4-4-4-4v3z'; // Иконка повтора одного
+            pathD = 'M13 15h2v4h-2zm-6-4h2v4H7zm0 8h10v-3l4 4-4 4v-3H5V9h2v10zM17 7H7V4l-4 4 4 4V9h10v4l4-4-4-4v3z';
         }
         
         iconPath.setAttribute('d', pathD);
@@ -504,7 +614,7 @@ class MusicPlayerApp {
 
             const isReleased = track.released;
             const trackEl = document.createElement('div');
-            trackEl.classList.add('track-item'); // Используем общий класс стиля трека
+            trackEl.classList.add('track-item');
             trackEl.classList.add('modal-track-item');
             if (!isReleased) {
                 trackEl.classList.add('track-released-false');
